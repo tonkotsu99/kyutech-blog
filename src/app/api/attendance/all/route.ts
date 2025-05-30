@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { cache } from "react";
 
@@ -41,11 +40,6 @@ const getAllMembersAttendance = cache(async () => {
 
 export async function GET() {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return new NextResponse("認証が必要です", { status: 401 });
-    }
-
     // キャッシュされた関数を使用して全メンバーの出席状況を取得
     const allMembers = await getAllMembersAttendance();
 
