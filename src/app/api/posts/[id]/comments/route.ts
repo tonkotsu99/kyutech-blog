@@ -1,6 +1,5 @@
 import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { error } from "console";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest, {params}: {params: {id: string}}) {
@@ -51,7 +50,7 @@ export async function GET(request: NextRequest, {params}: {params: {id: string}}
 
     return NextResponse.json(commentsWithLikeInfo)
   } catch (error) {
-    console.error("コメントの取得中にエラーが発生しました");
+    console.error("コメントの取得中にエラーが発生しました", error );
     return NextResponse.json({error: "コメントの取得中にエラーが発生しました"}, {status: 500})
   }
 }
