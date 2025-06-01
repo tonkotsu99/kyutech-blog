@@ -26,6 +26,9 @@ model UserProfile {
   posts        Post[]
   techSkills   TechSkill[]
   Attendance   Attendance[]
+  likes        Like[]
+  comments     Comment[]
+  commentLikes CommentLike[]
 
   @@index([userId])
 }
@@ -34,13 +37,65 @@ model Post {
   id        String      @id @default(cuid())
   title     String
   content   Json?
+  likeCount Int         @default(0)
   published Boolean     @default(false)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   authorId  String
   author    UserProfile @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes      Like[]
+  comments   Comment[]
 
   @@index([authorId])
+}
+
+model Like {
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+  user      UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post        @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
+  @@index([userId])
+  @@index([postId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isEdited  Boolean  @default(false)
+  likeCount Int      @default(0)
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+  user UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  parentId String?
+  parent   Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies  Comment[] @relation("CommentReplies")
+
+  likes CommentLike[]
+
+  @@index([postId])
+  @@index([userId])
+  @@index([parentId])
+}
+
+model CommentLike {
+  userId String
+  commentId String
+  createdAt DateTime @default(now())
+
+  user UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, commentId])
+  @@index([userId])
+  @@index([commentId])
 }
 
 model TechSkill {
