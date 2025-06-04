@@ -9,7 +9,7 @@ import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { Prisma } from "@prisma/client";
 
-const POSTS_PER_PAGE = 10;
+const POSTS_PER_PAGE = 5;
 
 type Post = {
   id: string;

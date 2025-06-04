@@ -58,15 +58,11 @@ export function PostCard({ post, profile }: PostCardProps) {
             <PostContent data={post.content} />
           </div>
         </CardContent>
-
         {/* Like Button Section */}
-        <div className="px-6 pb-4">
-          <LikeButton postId={post.id} />
-        </div>
+        <LikeButton postId={post.id} />
+        {/* Comment Section */}
+        <CommentSection postId={post.id} />
       </Card>
-
-      {/* Comment Section */}
-      <CommentSection postId={post.id} />
     </div>
   );
 }
