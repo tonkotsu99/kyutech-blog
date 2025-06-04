@@ -9,7 +9,8 @@ export async function POST(
   const params = await props.params;
   try {
     const { commentId } = params;
-    const { userId } = await requireAuth();
+    const { profile } = await requireAuth();
+    const userId = profile?.id;
 
     if (!userId) {
       return NextResponse.json({ erro: "認証が必要です" }, { status: 401 });
