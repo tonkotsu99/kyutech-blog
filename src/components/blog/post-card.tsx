@@ -14,7 +14,7 @@ import { PostCardProps } from "@/types";
 
 import { PostContent } from "../editor/post-content";
 import PostOperations from "../dashboard/blogs/post-operations";
-import LikeButton from "./like-button";
+
 import CommentSection from "./comment-section";
 
 export function PostCard({ post, profile }: PostCardProps) {
@@ -58,10 +58,9 @@ export function PostCard({ post, profile }: PostCardProps) {
             <PostContent data={post.content} />
           </div>
         </CardContent>
-        {/* Like Button Section */}
-        <LikeButton postId={post.id} />
+
         {/* Comment Section */}
-        <CommentSection postId={post.id} />
+        <CommentSection postId={post.id} profileId={profile.id} />
       </Card>
     </div>
   );
