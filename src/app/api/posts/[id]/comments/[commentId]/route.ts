@@ -2,7 +2,11 @@ import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PATCH(request:NextRequest, {params}: {params: {id: string; commentId: string}}) {
+export async function PATCH(
+  request:NextRequest,
+  props: {params: Promise<{id: string; commentId: string}>}
+) {
+  const params = await props.params;
   try {
     const {commentId} = params;
     const {userId} = await requireAuth();
@@ -54,7 +58,11 @@ export async function PATCH(request:NextRequest, {params}: {params: {id: string;
   }
 }
 
-export async function DELETE(request:NextRequest, {params}: {params: {id: string; commentId: string}}) {
+export async function DELETE(
+  request:NextRequest,
+  props: {params: Promise<{id: string; commentId: string}>}
+) {
+  const params = await props.params;
   try {
     const {commentId} = params
     const {userId} = await requireAuth();
