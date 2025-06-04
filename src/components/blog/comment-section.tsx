@@ -69,6 +69,7 @@ export default function CommentSection({
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
+  const [commentCount, setCommentCount] = useState(0);
 
   const {
     register,
@@ -156,6 +157,23 @@ export default function CommentSection({
     fetchComments();
   }, [postId, isOpen]);
 
+  // コメント数を取得
+  useEffect(() => {
+    const fetchCommentCount = async () => {
+      try {
+        const response = await fetch(`/api/posts/${postId}/comments/count`);
+        if (response.ok) {
+          const data = await response.json();
+          setCommentCount(data.count);
+        }
+      } catch (error) {
+        console.error("コメント数の取得中にエラーが発生しました", error);
+      }
+    };
+
+    fetchCommentCount();
+  }, [postId]);
+
   // コメントを投稿
   const onSubmit = async (data: { content: string }) => {
     if (!data.content.trim()) return;
@@ -173,6 +191,7 @@ export default function CommentSection({
       if (response.ok) {
         const newComment = await response.json();
         setComments((prev) => [{ ...newComment, replies: [] }, ...prev]);
+        setCommentCount((prev) => prev + 1);
         reset();
       } else {
         const error = await response.json();
@@ -316,6 +335,7 @@ export default function CommentSection({
             return comment;
           });
         });
+        setCommentCount((prev) => prev - 1);
       } else {
         const error = await response.json();
         console.error("コメントの削除に失敗しました", error);
@@ -583,9 +603,9 @@ export default function CommentSection({
         >
           <MessageSquare className="h-5 w-5" />
           <span>コメント</span>
-          {comments.length > 0 && (
+          {commentCount > 0 && (
             <span className="text-sm text-muted-foreground">
-              ({comments.length})
+              ({commentCount})
             </span>
           )}
         </Button>
