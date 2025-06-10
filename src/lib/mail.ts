@@ -70,7 +70,7 @@ ${process.env.NEXT_PUBLIC_APP_URL}/mobile/attendance
   <p>入室時刻: ${checkInTime.toLocaleString("ja-JP")}</p>
   
   <div style="margin: 30px 0;">
-    <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/profiles/${userId}" 
+    <a href="${process.env.NEXT_PUBLIC_APP_URL}/mobile/attendance" 
        style="background-color: #e11d48; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">
       在室手続きを行う
     </a>
