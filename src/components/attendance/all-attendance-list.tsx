@@ -91,7 +91,7 @@ export function AllAttendanceList() {
   }, {} as Record<string, LabMember[]>);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-[calc(100vh-5rem)]">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-[calc(100vh-14rem)]">
       {Object.entries(labGroups).map(([lab, labMembers]) => {
         const presentMembers = labMembers.filter(
           (member) => member.isCheckedIn
@@ -101,7 +101,10 @@ export function AllAttendanceList() {
         );
 
         return (
-          <Card key={lab} className="h-full overflow-hidden">
+          <Card
+            key={lab}
+            className="h-[calc(100vh-18rem)] md:h-full overflow-hidden"
+          >
             <CardHeader className="pb-2">
               <CardTitle>
                 <Link href={`localabo/${lab}`} className="hover:underline">
