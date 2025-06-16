@@ -258,13 +258,15 @@ const ProfileCard = ({
 
   return (
     <TooltipProvider>
-      <Card className="mt-5">
-        <CardHeader>
-          <h3 className="text-lg font-semibold text-gray-800">プロフィール</h3>
+      <Card className="mt-2 md:mt-5">
+        <CardHeader className="pb-2 md:pb-4">
+          <h3 className="text-base md:text-lg font-semibold text-gray-800">
+            プロフィール
+          </h3>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 md:space-y-6">
           <Card>
-            <CardContent className="pb-4">
+            <CardContent className="p-3 md:p-6 pr-4 md:pr-6">
               {isOwnProfile && (
                 <ProfileEditButtons
                   editMode={editMode}
@@ -292,7 +294,7 @@ const ProfileCard = ({
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="pb-1">
+            <CardContent className="p-3 md:p-6 pr-4 md:pr-6">
               <TechSkillsSection
                 techSkills={techSkills}
                 onAddSkill={handleAddSkill}

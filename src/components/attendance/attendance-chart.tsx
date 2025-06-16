@@ -29,15 +29,7 @@ type AttendanceChartProps = {
   records: AttendanceRecord[];
 };
 
-type CustomTooltipProps = {
-  active?: boolean;
-  payload?: Array<{
-    payload: ChartData;
-    value: number;
-  }>;
-  label?: string;
-};
-
+// 現在時刻を日本時間に変換する関数
 const getJSTNow = () => {
   const now = new Date();
   return new Date(now.getTime() + 9 * 60 * 60 * 1000);
@@ -93,40 +85,66 @@ export function AttendanceChart({ records }: AttendanceChartProps) {
     };
   });
 
-  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-background border rounded-lg p-2 shadow-md">
-          <p className="font-medium">{`${payload[0].payload.dayOfMonth} (${label})`}</p>
-          <p className="text-sm">{`${payload[0].payload.hoursText}`}</p>
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
-    <div className="h-[400px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData}>
+    <div className="w-full">
+      <ResponsiveContainer width="100%" height={400}>
+        <BarChart
+          data={chartData}
+          margin={{
+            top: 20,
+            right: 0,
+            left: 0,
+            bottom: 0,
+          }}
+        >
           <XAxis
             dataKey="date"
-            tickFormatter={(value) =>
-              `${value}\n${
-                chartData.find((d) => d.date === value)?.dayOfMonth || ""
-              }`
-            }
-            height={40}
+            angle={-45}
+            textAnchor="end"
+            height={80}
+            tick={{ fontSize: 14 }}
+            interval={0}
           />
-          <YAxis domain={[0, 8]} />
-          <Tooltip content={<CustomTooltip />} />
+          <YAxis
+            tick={{ fontSize: 14 }}
+            tickFormatter={(value) => `${value}時間`}
+            width={60}
+          />
+          <Tooltip
+            formatter={(value: number) => [`${value}時間`, "在室時間"]}
+            labelFormatter={(label) => `${label}`}
+            contentStyle={{
+              backgroundColor: "white",
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              padding: "12px",
+              fontSize: "14px",
+            }}
+          />
           <Bar
             dataKey="hours"
-            fill="hsl(var(--primary))"
+            fill="#3b82f6"
             radius={[4, 4, 0, 0]}
+            maxBarSize={80}
           />
         </BarChart>
       </ResponsiveContainer>
+      <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">
+        {chartData.map((data) => (
+          <div
+            key={data.date}
+            className="text-center p-3 bg-gray-50 rounded-lg shadow-sm"
+          >
+            <div className="text-base font-medium text-gray-900">
+              {data.date}
+            </div>
+            <div className="text-sm text-gray-500">{data.dayOfMonth}</div>
+            <div className="text-base font-semibold text-blue-600">
+              {data.hoursText}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
