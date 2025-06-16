@@ -23,7 +23,7 @@ export async function AppSidebar({
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <Link href={"/localabo"} className="hidden md:flex items-center">
+        <Link href={"/localabo"} className="flex items-center">
           <Image
             src="/icon.svg"
             alt="icon"
@@ -31,7 +31,7 @@ export async function AppSidebar({
             height="50"
             className="shrink-0"
           />
-          <span className="font-bold hidden md:inline-block pl-1 md:text-4xl my-auto group-data-[collapsible=icon]:hidden">
+          <span className="font-bold inline-block pl-1 text-4xl my-auto group-data-[collapsible=icon]:hidden">
             LocaLabo
           </span>
         </Link>
