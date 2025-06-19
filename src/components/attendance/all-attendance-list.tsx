@@ -5,9 +5,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { LayoutDashboard, UserCircle } from "lucide-react";
 
 interface LabMember {
   id: string;
@@ -141,12 +150,43 @@ export function AllAttendanceList() {
                             </Avatar>
                             <div>
                               <div className="flex items-center space-x-1">
-                                <Link
-                                  href={`/dashboard/${member.userId}`}
-                                  className="font-medium hover:underline text-sm"
-                                >
-                                  {member.name}
-                                </Link>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <span className="font-medium hover:underline text-sm cursor-pointer">
+                                      {member.name}
+                                    </span>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="start">
+                                    <DropdownMenuLabel>
+                                      メンバー操作
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem asChild>
+                                      <Link
+                                        href={`/dashboard/${member.userId}`}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <LayoutDashboard className="w-4 h-4 text-blue-500" />
+                                        <span>ダッシュボード</span>
+                                        <span className="ml-2 text-xs text-muted-foreground">
+                                          ダッシュボード画面に移動
+                                        </span>
+                                      </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                      <Link
+                                        href={`/dashboard/profiles/${member.userId}`}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <UserCircle className="w-4 h-4 text-green-500" />
+                                        <span>プロフィール</span>
+                                        <span className="ml-2 text-xs text-muted-foreground">
+                                          プロフィール画面に移動
+                                        </span>
+                                      </Link>
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                                 {member.academicYear && (
                                   <Badge
                                     variant="secondary"
@@ -207,12 +247,43 @@ export function AllAttendanceList() {
                             </Avatar>
                             <div>
                               <div className="flex items-center space-x-1">
-                                <Link
-                                  href={`/dashboard/profiles/${member.userId}`}
-                                  className="font-medium hover:underline text-sm"
-                                >
-                                  {member.name}
-                                </Link>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <span className="font-medium hover:underline text-sm cursor-pointer">
+                                      {member.name}
+                                    </span>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="start">
+                                    <DropdownMenuLabel>
+                                      メンバー操作
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem asChild>
+                                      <Link
+                                        href={`/dashboard/${member.userId}`}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <LayoutDashboard className="w-4 h-4 text-blue-500" />
+                                        <span>ダッシュボード</span>
+                                        <span className="ml-2 text-xs text-muted-foreground">
+                                          ダッシュボード画面に移動
+                                        </span>
+                                      </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                      <Link
+                                        href={`/dashboard/profiles/${member.userId}`}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <UserCircle className="w-4 h-4 text-green-500" />
+                                        <span>プロフィール</span>
+                                        <span className="ml-2 text-xs text-muted-foreground">
+                                          プロフィール画面に移動
+                                        </span>
+                                      </Link>
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                                 {member.academicYear && (
                                   <Badge
                                     variant="secondary"
