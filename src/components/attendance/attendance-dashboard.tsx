@@ -62,40 +62,41 @@ export function AttendanceDashboard({
         setRecords(data.records);
 
         // 今日の記録を抽出
-        const today = getJSTNow();
-        const todayStart = new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          today.getDate(),
-          0,
-          0,
-          0,
-          0
-        );
-        const todayEnd = new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          today.getDate(),
+        // 1. 現在のJST日時を取得
+        const nowJST = new Date(Date.now() + 9 * 60 * 60 * 1000);
+        // 2. JSTの今日の0時・23:59:59.999
+        const jstYear = nowJST.getFullYear();
+        const jstMonth = nowJST.getMonth();
+        const jstDate = nowJST.getDate();
+        const todayStartJST = new Date(jstYear, jstMonth, jstDate, 0, 0, 0, 0);
+        const todayEndJST = new Date(
+          jstYear,
+          jstMonth,
+          jstDate,
           23,
           59,
           59,
           999
         );
+        // 3. それをUTCに変換
+        const todayStartUTC = new Date(
+          todayStartJST.getTime() - 9 * 60 * 60 * 1000
+        );
+        const todayEndUTC = new Date(
+          todayEndJST.getTime() - 9 * 60 * 60 * 1000
+        );
 
         const todayFiltered = data.records.filter(
           (record: AttendanceRecord) => {
             const checkInDate = new Date(record.check_in);
-            const checkInJST = new Date(
-              checkInDate.getTime() + 9 * 60 * 60 * 1000
-            );
-            return checkInJST >= todayStart && checkInJST <= todayEnd;
+            return checkInDate >= todayStartUTC && checkInDate <= todayEndUTC;
           }
         );
         setTodayRecords(todayFiltered);
 
         // 先週の記録を抽出
-        const weekStart = startOfWeek(subWeeks(today, 1), { locale: ja });
-        const weekEnd = endOfWeek(subWeeks(today, 1), { locale: ja });
+        const weekStart = startOfWeek(subWeeks(nowJST, 1), { locale: ja });
+        const weekEnd = endOfWeek(subWeeks(nowJST, 1), { locale: ja });
 
         const weekFiltered = data.records.filter((record: AttendanceRecord) => {
           const checkInDate = new Date(record.check_in);
@@ -104,8 +105,8 @@ export function AttendanceDashboard({
         setWeekRecords(weekFiltered);
 
         // 今月の記録を抽出
-        const monthStart = startOfMonth(today);
-        const monthEnd = endOfMonth(today);
+        const monthStart = startOfMonth(nowJST);
+        const monthEnd = endOfMonth(nowJST);
 
         const monthFiltered = data.records.filter(
           (record: AttendanceRecord) => {
