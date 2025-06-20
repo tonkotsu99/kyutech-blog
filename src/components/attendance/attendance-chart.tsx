@@ -99,9 +99,9 @@ export function AttendanceChart({ records }: AttendanceChartProps) {
         >
           <XAxis
             dataKey="date"
-            angle={-45}
-            textAnchor="end"
-            height={80}
+            angle={0}
+            textAnchor="middle"
+            height={60}
             tick={{ fontSize: 14 }}
             interval={0}
           />
