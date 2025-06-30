@@ -5,12 +5,7 @@ import { cache } from "react";
 
 // パラメータを受け取るキャッシュ関数
 const getAttendanceHistory = cache(
-  async (
-    userId: string,
-    targetUserId: string | null,
-    limit: number,
-    page: number
-  ) => {
+  async (userId: string, targetUserId: string | null) => {
     // 対象ユーザーのプロフィールを取得
     let targetProfile;
 
@@ -63,9 +58,6 @@ const getAttendanceHistory = cache(
     return {
       records: attendanceRecords,
       total: totalRecords,
-      page,
-      limit,
-      totalPages: Math.ceil(totalRecords / limit),
     };
   }
 );
@@ -80,17 +72,10 @@ export async function GET(req: Request) {
     // URLからパラメータを取得
     const url = new URL(req.url);
     const targetUserId = url.searchParams.get("userId");
-    const limit = parseInt(url.searchParams.get("limit") || "30");
-    const page = parseInt(url.searchParams.get("page") || "1");
 
     // キャッシュされた関数を呼び出し
     try {
-      const result = await getAttendanceHistory(
-        userId,
-        targetUserId,
-        limit,
-        page
-      );
+      const result = await getAttendanceHistory(userId, targetUserId);
       return NextResponse.json(result);
     } catch (error) {
       console.error("[ATTENDANCE_HISTORY_GET]", error);
