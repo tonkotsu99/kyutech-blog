@@ -44,8 +44,6 @@ const getAttendanceHistory = cache(
       }
     }
 
-    const skip = (page - 1) * limit;
-
     // 在室記録を取得
     const attendanceRecords = await db.attendance.findMany({
       where: {
@@ -54,8 +52,6 @@ const getAttendanceHistory = cache(
       orderBy: {
         check_in: "desc",
       },
-      skip,
-      take: limit,
     });
     // 総レコード数を取得
     const totalRecords = await db.attendance.count({
