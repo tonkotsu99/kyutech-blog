@@ -6,13 +6,21 @@ const toJST = (date: Date) => {
 
 export const createAttendance = async (profileId: string, comment?: string) => {
   try {
-    return await db.attendance.create({
+    const attendance = await db.attendance.create({
       data: {
         user_id: profileId,
         check_in: toJST(new Date()),
         comment: comment || null,
       },
     });
+
+    // isCheckedIn を true に更新
+    await db.userProfile.update({
+      where: { id: profileId },
+      data: { isCheckedIn: true },
+    });
+
+    return attendance;
   } catch (error) {
     console.error("Error creating attendance:", error);
     throw error;
@@ -35,7 +43,7 @@ export const updateAttendance = async (profileId: string, comment?: string) => {
       throw new Error("チェックイン記録が見つかりません");
     }
 
-    return await db.attendance.update({
+    const updatedAttendance = await db.attendance.update({
       where: {
         id: attendance.id,
       },
@@ -44,6 +52,14 @@ export const updateAttendance = async (profileId: string, comment?: string) => {
         comment: comment || null,
       },
     });
+
+    // isCheckedIn を false に更新
+    await db.userProfile.update({
+      where: { id: profileId },
+      data: { isCheckedIn: false },
+    });
+
+    return updatedAttendance;
   } catch (error) {
     console.error("Error updating attendance:", error);
     throw error;
