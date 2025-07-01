@@ -63,7 +63,8 @@ export function AttendanceDashboard({
 
         // 今日の記録を抽出
         // 1. 現在のJST日時を取得
-        const nowJST = new Date(Date.now() + 9 * 60 * 60 * 1000);
+        const nowJST = new Date(Date.now());
+
         // 2. JSTの今日の0時・23:59:59.999
         const jstYear = nowJST.getFullYear();
         const jstMonth = nowJST.getMonth();
@@ -84,6 +85,11 @@ export function AttendanceDashboard({
         );
         const todayEndUTC = new Date(
           todayEndJST.getTime() - 9 * 60 * 60 * 1000
+        );
+        console.log(
+          "nowJST:" + nowJST,
+          "todayStartJST:" + todayStartJST,
+          "todayEndJST:" + todayEndJST
         );
 
         const todayFiltered = data.records.filter(
