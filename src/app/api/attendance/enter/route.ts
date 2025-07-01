@@ -1,5 +1,6 @@
 import { createAttendance } from "@/lib/prisma/attendance";
 import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,11 +14,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await createAttendance(userId);
+    // 既にチェックイン済みか確認
+    const profile = await db.userProfile.findUnique({
+      where: { id: userId },
+      select: { isCheckedIn: true },
+    });
+    if (profile?.isCheckedIn) {
+      return NextResponse.json({
+        success: false,
+        isCheckedIn: true,
+        message: "既にチェックイン済みです",
+      });
+    }
+
+    await createAttendance(userId);
 
     return NextResponse.json({
       success: true,
-      isCheckedIn: result,
+      isCheckedIn: true,
       message: "チェックインが完了しました",
     });
   } catch (error) {
