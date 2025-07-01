@@ -96,27 +96,36 @@ export function AttendanceDashboard({
 
         // 先週の記録を抽出
         const weekStart = startOfWeek(subWeeks(nowJST, 1), { locale: ja });
+        const weekStart9plus = new Date(
+          weekStart.getTime() + 9 * 60 * 60 * 1000
+        );
         const weekEnd = endOfWeek(subWeeks(nowJST, 1), { locale: ja });
+        const weekEnd9plus = new Date(weekEnd.getTime() + 9 * 60 * 60 * 1000);
 
         const weekFiltered = data.records.filter((record: AttendanceRecord) => {
           const checkInDate = new Date(record.check_in);
-          return checkInDate >= weekStart && checkInDate <= weekEnd;
+          return checkInDate >= weekStart9plus && checkInDate <= weekEnd9plus;
         });
         setWeekRecords(weekFiltered);
 
         // 今月の記録を抽出
         const monthStart = startOfMonth(nowJST);
+        const monthStart9plus = new Date(
+          monthStart.getTime() + 9 * 60 * 60 * 1000
+        );
+
         const monthEnd = endOfMonth(nowJST);
+        const monthEnd9plus = new Date(monthEnd.getTime() + 9 * 60 * 60 * 1000);
 
         const monthFiltered = data.records.filter(
           (record: AttendanceRecord) => {
             const checkInDate = new Date(record.check_in);
-            return checkInDate >= monthStart && checkInDate <= monthEnd;
+            return (
+              checkInDate >= monthStart9plus && checkInDate <= monthEnd9plus
+            );
           }
         );
         setMonthRecords(monthFiltered);
-
-        console.log("monthStart" + monthStart, "monthEnd" + monthEnd);
       } catch (error) {
         console.error("在室記録の取得に失敗しました:", error);
         toast.error("在室記録の取得に失敗しました");
