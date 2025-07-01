@@ -63,8 +63,7 @@ export function AttendanceDashboard({
 
         // 今日の記録を抽出
         // 1. 現在のJST日時を取得
-        const nowJST = new Date(Date.now());
-
+        const nowJST = new Date(Date.now() + 18 * 60 * 60 * 1000);
         // 2. JSTの今日の0時・23:59:59.999
         const jstYear = nowJST.getFullYear();
         const jstMonth = nowJST.getMonth();
@@ -85,11 +84,6 @@ export function AttendanceDashboard({
         );
         const todayEndUTC = new Date(
           todayEndJST.getTime() - 9 * 60 * 60 * 1000
-        );
-        console.log(
-          "nowJST:" + nowJST,
-          "todayStartJST:" + todayStartJST,
-          "todayEndJST:" + todayEndJST
         );
 
         const todayFiltered = data.records.filter(
@@ -121,6 +115,8 @@ export function AttendanceDashboard({
           }
         );
         setMonthRecords(monthFiltered);
+
+        console.log("monthStart" + monthStart, "monthEnd" + monthEnd);
       } catch (error) {
         console.error("在室記録の取得に失敗しました:", error);
         toast.error("在室記録の取得に失敗しました");
