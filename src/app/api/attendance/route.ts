@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { getLabMembers } from "@/lib/prisma/lab";
+import { createAttendance, updateAttendance } from "@/lib/prisma/attendance";
+import { PresenceStatus } from "@prisma/client";
 
 export async function POST(req: Request) {
   try {
@@ -32,7 +34,10 @@ export async function POST(req: Request) {
       // プロフィールは在室中とマークされているが、実際のレコードがない場合
       await db.userProfile.update({
         where: { id: profile.id },
-        data: { isCheckedIn: false },
+        data: {
+          isCheckedIn: false,
+          presenceStatus: PresenceStatus.OFF_CAMPUS,
+        },
       });
       return new NextResponse(
         "在室状態をリセットしました。もう一度入室してください。",
@@ -47,24 +52,17 @@ export async function POST(req: Request) {
       }
 
       // 新しいチェックインを作成
-      await db.attendance.create({
-        data: {
-          user_id: profile.id,
-        },
-      });
-
-      // プロフィールの在室状態を更新
-      await db.userProfile.update({
-        where: { id: profile.id },
-        data: { isCheckedIn: true },
-      });
+      await createAttendance(profile.id);
     } else if (action === "check-out") {
       // 未完了のチェックインを探す
       if (!activeAttendance) {
         // プロフィールの在室状態を更新（整合性を保つため）
         await db.userProfile.update({
           where: { id: profile.id },
-          data: { isCheckedIn: false },
+          data: {
+            isCheckedIn: false,
+            presenceStatus: PresenceStatus.OFF_CAMPUS,
+          },
         });
         return new NextResponse(
           "アクティブな入室記録が見つかりませんでしたが、在室状態をリセットしました。",
@@ -72,16 +70,8 @@ export async function POST(req: Request) {
         );
       }
 
-      // チェックアウトを記録
-      await db.attendance.update({
-        where: { id: activeAttendance.id },
-        data: { check_out: new Date() },
-      });
-
-      // プロフィールの在室状態を更新
-      await db.userProfile.update({
-        where: { id: profile.id },
-        data: { isCheckedIn: false },
+      await updateAttendance(profile.id, {
+        nextStatus: PresenceStatus.OFF_CAMPUS,
       });
     } else {
       return new NextResponse("不正なアクションです", { status: 400 });

@@ -18,6 +18,7 @@ model UserProfile {
   academicYear String
   description  String?
   isCheckedIn  Boolean @default(false)
+  presenceStatus PresenceStatus @default(OFF_CAMPUS)
   github       String?
   x            String?
   instagram    String?
@@ -31,6 +32,12 @@ model UserProfile {
   commentLikes CommentLike[]
 
   @@index([userId])
+}
+
+enum PresenceStatus {
+  IN_LAB
+  ON_CAMPUS
+  OFF_CAMPUS
 }
 
 model Post {

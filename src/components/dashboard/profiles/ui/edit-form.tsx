@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -43,6 +44,8 @@ const EditForm = ({ profile, onCancel }) => {
       github: profile.github || "未設定",
       x: profile.x || "未設定",
       instagram: profile.instagram || "未設定",
+      isCheckedIn: profile.isCheckedIn ?? false,
+      presenceStatus: profile.presenceStatus || "OFF_CAMPUS",
     },
   });
 
@@ -56,6 +59,8 @@ const EditForm = ({ profile, onCancel }) => {
       github: profile.github || "未設定",
       x: profile.x || "未設定",
       instagram: profile.instagram || "未設定",
+      isCheckedIn: profile.isCheckedIn ?? false,
+      presenceStatus: profile.presenceStatus || "OFF_CAMPUS",
     });
     setPreviewUrl(profile.imageUrl || "未設定");
   }, [profile, form]);
@@ -107,6 +112,7 @@ const EditForm = ({ profile, onCancel }) => {
         github: values.github,
         instagram: values.instagram,
         isCheckedIn: profile.isCheckedIn,
+        presenceStatus: profile.presenceStatus || "OFF_CAMPUS",
       });
       toast.success("プロフィールを更新しました", {
         description: "プロフィールが正常に更新されました。",

@@ -28,8 +28,11 @@ export const saveUserProfileAction = async ({
   x,
   instagram,
   isCheckedIn,
+  presenceStatus,
 }: SaveUserProfileProps) => {
   try {
+    const nextPresence =
+      presenceStatus ?? (isCheckedIn ? "IN_LAB" : "OFF_CAMPUS");
     const result = await updateUserProfile(userId, {
       name,
       imageUrl,
@@ -41,6 +44,7 @@ export const saveUserProfileAction = async ({
       x,
       instagram,
       isCheckedIn,
+      presenceStatus: nextPresence,
     });
 
     if (!result) {
@@ -56,6 +60,7 @@ export const saveUserProfileAction = async ({
         x,
         instagram,
         isCheckedIn,
+        presenceStatus: nextPresence,
       });
     }
     revalidatePath("/profile");
@@ -83,11 +88,16 @@ export async function toggleCheckedInStatus(
     }
 
     // Attendanceテーブルへの記録
+    const nextPresenceStatus = isCheckedIn ? "IN_LAB" : "OFF_CAMPUS";
+
     if (isCheckedIn) {
       await createAttendance(profile.id, comment);
     } else {
       try {
-        await updateAttendance(profile.id, comment);
+        await updateAttendance(profile.id, {
+          comment,
+          nextStatus: "OFF_CAMPUS",
+        });
       } catch (error) {
         // チェックイン記録が見つからない場合は、プロフィールの状態のみを更新
         console.error(error);
@@ -108,6 +118,7 @@ export async function toggleCheckedInStatus(
       x: profile.x || "",
       instagram: profile.instagram || "",
       isCheckedIn,
+      presenceStatus: nextPresenceStatus,
     });
 
     revalidatePath("/");

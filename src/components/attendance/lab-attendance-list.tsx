@@ -28,6 +28,7 @@ interface LabMember {
   name: string;
   imageUrl: string;
   isCheckedIn: boolean;
+  presenceStatus: "IN_LAB" | "ON_CAMPUS" | "OFF_CAMPUS";
   academicYear?: string;
   researchLab: string;
   Attendance: {
@@ -190,8 +191,15 @@ export function LabAttendanceList({ labName }: AttendanceListProps) {
     );
   }
 
-  const presentMembers = members.filter((member) => member.isCheckedIn);
-  const absentMembers = members.filter((member) => !member.isCheckedIn);
+  const presentMembers = members.filter(
+    (member) => member.presenceStatus === "IN_LAB"
+  );
+  const onCampusMembers = members.filter(
+    (member) => member.presenceStatus === "ON_CAMPUS"
+  );
+  const offCampusMembers = members.filter(
+    (member) => member.presenceStatus === "OFF_CAMPUS"
+  );
 
   return (
     <div className="space-y-8">
@@ -220,7 +228,7 @@ export function LabAttendanceList({ labName }: AttendanceListProps) {
                   <div>
                     <div className="flex items-center space-x-2">
                       <Link
-                        href={`/dashboard/${member.userId}`}
+                        href={`/dashboard/profiles/${member.userId}`}
                         className="font-medium hover:underline text-sm"
                       >
                         {member.name}
@@ -293,15 +301,64 @@ export function LabAttendanceList({ labName }: AttendanceListProps) {
 
       <div>
         <h3 className="text-lg font-semibold mb-4">
-          不在 ({absentMembers.length})
+          学内 ({onCampusMembers.length})
         </h3>
-        {absentMembers.length === 0 ? (
+        {onCampusMembers.length === 0 ? (
+          <p className="text-center text-muted-foreground py-4">
+            現在学内にいるメンバーはいません
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {onCampusMembers.map((member) => (
+              <div
+                key={member.id}
+                className="flex items-center justify-between p-3 rounded-lg border bg-card"
+              >
+                <div className="flex items-center space-x-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={member.imageUrl} alt={member.name} />
+                    <AvatarFallback>
+                      {member.name.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <Link
+                        href={`/dashboard/profiles/${member.userId}`}
+                        className="font-medium hover:underline text-sm"
+                      >
+                        {member.name}
+                      </Link>
+                      {member.academicYear && (
+                        <Badge variant="secondary" className="text-xs">
+                          {member.academicYear}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">学内滞在中</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="h-2 w-2 rounded-full bg-amber-400"></div>
+                  <span className="text-xs text-muted-foreground">学内</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <h3 className="text-lg font-semibold mb-4">
+          退室 ({offCampusMembers.length})
+        </h3>
+        {offCampusMembers.length === 0 ? (
           <p className="text-center text-muted-foreground py-4">
             退室しているメンバーはいません
           </p>
         ) : (
           <div className="grid grid-cols-1 gap-4">
-            {absentMembers.map((member) => (
+            {offCampusMembers.map((member) => (
               <div
                 key={member.id}
                 className="flex items-center justify-between p-3 rounded-lg border bg-card"

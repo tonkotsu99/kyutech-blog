@@ -44,6 +44,8 @@ const AdditionalInfoForm = ({ userId }: ProfileFormProps) => {
       github: "",
       x: "",
       instagram: "",
+      isCheckedIn: false,
+      presenceStatus: "OFF_CAMPUS",
     },
   });
 
@@ -59,6 +61,8 @@ const AdditionalInfoForm = ({ userId }: ProfileFormProps) => {
         github: "",
         x: "",
         instagram: "",
+        isCheckedIn: false,
+        presenceStatus: "OFF_CAMPUS",
       });
     }
   }, [isLoaded, user, form]);
@@ -79,6 +83,7 @@ const AdditionalInfoForm = ({ userId }: ProfileFormProps) => {
         x: values.x || "",
         instagram: values.instagram || "",
         isCheckedIn: true,
+        presenceStatus: "IN_LAB",
       });
       if (result.success) {
         await toggleCheckedInStatus(userId, true);

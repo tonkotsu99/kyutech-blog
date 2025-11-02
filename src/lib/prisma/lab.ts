@@ -37,6 +37,7 @@ export const getLabMembers = cache(
         isCheckedIn: true,
         academicYear: true,
         researchLab: true,
+        presenceStatus: true,
         Attendance: {
           where: { check_out: null },
           select: { check_in: true },

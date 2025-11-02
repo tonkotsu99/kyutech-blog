@@ -48,6 +48,7 @@ export type SaveUserProfileProps = {
   x: string;
   instagram: string;
   isCheckedIn: boolean;
+  presenceStatus: "IN_LAB" | "ON_CAMPUS" | "OFF_CAMPUS";
 };
 
 export type EditProfileProps = {
@@ -167,6 +168,7 @@ export type profileProps = {
   academicYear: string;
   description: string | "";
   isCheckedIn: boolean;
+  presenceStatus: "IN_LAB" | "ON_CAMPUS" | "OFF_CAMPUS";
   comment?: string;
   github: string | "";
   x: string | "";

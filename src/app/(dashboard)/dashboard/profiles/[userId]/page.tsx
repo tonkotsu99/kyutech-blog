@@ -35,6 +35,7 @@ export default async function Profile(props: Props) {
             academicYear: targetProfile.academicYear,
             description: targetProfile.description || "",
             isCheckedIn: targetProfile.isCheckedIn,
+            presenceStatus: targetProfile.presenceStatus || "OFF_CAMPUS",
             github: targetProfile.github || "",
             x: targetProfile.x || "",
             instagram: targetProfile.instagram || "",
