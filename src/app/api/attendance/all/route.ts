@@ -11,6 +11,7 @@ const getAllMembersAttendance = cache(async () => {
       name: true,
       imageUrl: true,
       isCheckedIn: true,
+      presenceStatus: true,
       academicYear: true,
       researchLab: true,
       Attendance: {
@@ -23,7 +24,12 @@ const getAllMembersAttendance = cache(async () => {
         take: 1,
       },
     },
-    orderBy: [{ researchLab: "asc" }, { isCheckedIn: "desc" }, { name: "asc" }],
+    orderBy: [
+      { researchLab: "asc" },
+      { presenceStatus: "asc" },
+      { isCheckedIn: "desc" },
+      { name: "asc" },
+    ],
   });
 
   // チェックイン時間をUTCに戻す

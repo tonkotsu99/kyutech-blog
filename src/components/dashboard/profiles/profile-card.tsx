@@ -45,6 +45,7 @@ const ProfileCard = ({
     email: initialProfile?.email || "",
     description: initialProfile?.description || "",
     isCheckedIn: initialProfile?.isCheckedIn,
+    presenceStatus: initialProfile?.presenceStatus || "OFF_CAMPUS",
     github: initialProfile?.github || "",
     x: initialProfile?.x || "",
     instagram: initialProfile?.instagram || "",
@@ -69,6 +70,7 @@ const ProfileCard = ({
       email: profile.email || "",
       description: profile.description || "",
       isCheckedIn: profile.isCheckedIn,
+      presenceStatus: profile.presenceStatus || "OFF_CAMPUS",
       github: profile.github || "",
       x: profile.x || "",
       instagram: profile.instagram || "",
@@ -84,6 +86,7 @@ const ProfileCard = ({
       email: profile.email || "",
       description: profile.description || "",
       isCheckedIn: profile.isCheckedIn,
+      presenceStatus: profile.presenceStatus || "OFF_CAMPUS",
       github: profile.github || "",
       x: profile.x || "",
       instagram: profile.instagram || "",
@@ -150,6 +153,7 @@ const ProfileCard = ({
         x: updatedProfileData.x,
         instagram: updatedProfileData.instagram,
         isCheckedIn: updatedProfileData.isCheckedIn,
+        presenceStatus: updatedProfileData.presenceStatus || "OFF_CAMPUS",
       });
       setProfile(updatedProfileData);
       setEditMode(false);
@@ -166,22 +170,53 @@ const ProfileCard = ({
 
   const handleToggleCheckedInStatus = async () => {
     if (!editMode) {
-      setProfile({ ...profile, isCheckedIn: !profile.isCheckedIn });
+      setProfile((prev) => ({
+        ...prev,
+        isCheckedIn: !prev.isCheckedIn,
+        presenceStatus: !prev.isCheckedIn ? "IN_LAB" : "OFF_CAMPUS",
+      }));
     }
     try {
       const newStatus = await toggleCheckedInStatus(
         profile.userId,
         !profile.isCheckedIn
       );
-      setProfile({ ...profile, isCheckedIn: newStatus });
+      setProfile((prev) => ({
+        ...prev,
+        isCheckedIn: newStatus,
+        presenceStatus: newStatus ? "IN_LAB" : "OFF_CAMPUS",
+      }));
       if (newStatus) {
         toast.success("在室に変更しました");
       } else {
-        toast.error("退室に変更しました");
+        toast.success("退室に変更しました");
       }
     } catch (error) {
       console.error("チェックイン状態更新エラー:", error);
       toast.error("チェックイン状態の更新に失敗しました");
+    }
+  };
+
+  const handleSetOnCampusStatus = async () => {
+    try {
+      const response = await fetch("/api/attendance/inside-area", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || "学内ステータスの更新に失敗しました");
+      }
+
+      setProfile((prev) => ({
+        ...prev,
+        isCheckedIn: false,
+        presenceStatus: "ON_CAMPUS",
+      }));
+      toast.success("学内ステータスに変更しました");
+    } catch (error) {
+      console.error("学内ステータス更新エラー:", error);
+      toast.error("学内ステータスの更新に失敗しました");
     }
   };
 
@@ -280,6 +315,7 @@ const ProfileCard = ({
                   <ProfileHeader
                     profile={profile}
                     onToggleCheckedIn={handleToggleCheckedInStatus}
+                    onSetOnCampus={handleSetOnCampusStatus}
                     isOwnProfile={isOwnProfile}
                   />
                 ) : (

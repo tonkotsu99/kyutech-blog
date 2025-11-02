@@ -1,4 +1,5 @@
 import { updateAttendance } from "@/lib/prisma/attendance";
+import { PresenceStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
@@ -27,10 +28,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const result = await updateAttendance(userId);
+    await updateAttendance(userId, { nextStatus: PresenceStatus.OFF_CAMPUS });
     return NextResponse.json({
       success: true,
-      isCheckedIn: result,
+      isCheckedIn: false,
+      presenceStatus: PresenceStatus.OFF_CAMPUS,
       message: "チェックアウトが完了しました",
     });
   } catch (error) {

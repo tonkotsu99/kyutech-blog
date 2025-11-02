@@ -1,7 +1,21 @@
+import { PresenceStatus } from "@prisma/client";
 import { db } from "../db";
 
 const toJST = (date: Date) => {
   return new Date(date.getTime() + 9 * 60 * 60 * 1000);
+};
+
+const updateProfilePresence = async (
+  profileId: string,
+  status: PresenceStatus
+) => {
+  await db.userProfile.update({
+    where: { id: profileId },
+    data: {
+      isCheckedIn: status === PresenceStatus.IN_LAB,
+      presenceStatus: status,
+    },
+  });
 };
 
 export const createAttendance = async (profileId: string, comment?: string) => {
@@ -14,11 +28,7 @@ export const createAttendance = async (profileId: string, comment?: string) => {
       },
     });
 
-    // isCheckedIn を true に更新
-    await db.userProfile.update({
-      where: { id: profileId },
-      data: { isCheckedIn: true },
-    });
+    await updateProfilePresence(profileId, PresenceStatus.IN_LAB);
 
     return attendance;
   } catch (error) {
@@ -27,8 +37,14 @@ export const createAttendance = async (profileId: string, comment?: string) => {
   }
 };
 
-export const updateAttendance = async (profileId: string, comment?: string) => {
+export const updateAttendance = async (
+  profileId: string,
+  options?: { comment?: string; nextStatus?: PresenceStatus }
+) => {
   try {
+    const comment = options?.comment;
+    const nextStatus = options?.nextStatus ?? PresenceStatus.OFF_CAMPUS;
+
     const attendance = await db.attendance.findFirst({
       where: {
         user_id: profileId,
@@ -53,11 +69,7 @@ export const updateAttendance = async (profileId: string, comment?: string) => {
       },
     });
 
-    // isCheckedIn を false に更新
-    await db.userProfile.update({
-      where: { id: profileId },
-      data: { isCheckedIn: false },
-    });
+    await updateProfilePresence(profileId, nextStatus);
 
     return updatedAttendance;
   } catch (error) {

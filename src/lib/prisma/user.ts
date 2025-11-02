@@ -1,6 +1,6 @@
 import { cache } from "react";
+import { PresenceStatus, UserProfile } from "@prisma/client";
 import { db } from "../db";
-import { UserProfile } from "@prisma/client";
 
 export const getUserProfile = cache(
   async (userIdOrId: string): Promise<UserProfile | null> => {
@@ -37,6 +37,7 @@ export const createUserProfile = async ({
   x,
   instagram,
   isCheckedIn,
+  presenceStatus = PresenceStatus.OFF_CAMPUS,
 }: {
   userId: string;
   name: string;
@@ -49,6 +50,7 @@ export const createUserProfile = async ({
   x: string;
   instagram: string;
   isCheckedIn: boolean;
+  presenceStatus?: PresenceStatus;
 }) => {
   try {
     return await db.userProfile.create({
@@ -64,6 +66,7 @@ export const createUserProfile = async ({
         x,
         instagram,
         isCheckedIn,
+        presenceStatus,
       },
     });
   } catch (error) {
@@ -83,6 +86,7 @@ type UpdateUserProfileData = {
   x: string;
   instagram: string;
   isCheckedIn: boolean;
+  presenceStatus: PresenceStatus;
 };
 
 export const updateUserProfile = async (

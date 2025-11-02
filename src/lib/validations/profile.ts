@@ -11,4 +11,7 @@ export const profileFormSchema = z.object({
   x: z.string(),
   instagram: z.string(),
   isCheckedIn: z.boolean(),
+  presenceStatus: z
+    .enum(["IN_LAB", "ON_CAMPUS", "OFF_CAMPUS"])
+    .default("OFF_CAMPUS"),
 });

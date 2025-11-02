@@ -24,6 +24,7 @@ interface LabMember {
   name: string;
   imageUrl: string;
   isCheckedIn: boolean;
+  presenceStatus: "IN_LAB" | "ON_CAMPUS" | "OFF_CAMPUS";
   academicYear?: string;
   researchLab: string;
   Attendance: {
@@ -99,15 +100,162 @@ export function AllAttendanceList() {
     return groups;
   }, {} as Record<string, LabMember[]>);
 
+  type PresenceBucket = "IN_LAB" | "ON_CAMPUS" | "OFF_CAMPUS";
+
+  const statusConfigs: Record<
+    PresenceBucket,
+    {
+      title: string;
+      emptyMessage: string;
+      dotClass: string;
+      statusLabel: string;
+      description: (member: LabMember) => string | null;
+    }
+  > = {
+    IN_LAB: {
+      title: "在室",
+      emptyMessage: "現在在室しているメンバーはいません",
+      dotClass: "bg-green-500",
+      statusLabel: "在室中",
+      description: (member) => {
+        const checkIn = member.Attendance[0]?.check_in;
+        if (!checkIn) return null;
+        return `${formatDistanceToNow(new Date(checkIn), {
+          addSuffix: true,
+          locale: ja,
+        })}から在室中`;
+      },
+    },
+    ON_CAMPUS: {
+      title: "学内",
+      emptyMessage: "現在学内にいるメンバーはいません",
+      dotClass: "bg-amber-500",
+      statusLabel: "学内",
+      description: () => "キャンパス内に滞在中",
+    },
+    OFF_CAMPUS: {
+      title: "学外",
+      emptyMessage: "退室しているメンバーはいません",
+      dotClass: "bg-gray-300",
+      statusLabel: "退室中",
+      description: () => "退室済み",
+    },
+  };
+
+  const renderMemberActions = (member: LabMember) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <span className="font-medium hover:underline text-sm cursor-pointer">
+          {member.name}
+        </span>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        <DropdownMenuLabel>メンバー操作</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link
+            href={`/dashboard/${member.userId}`}
+            className="flex items-center gap-2"
+          >
+            <LayoutDashboard className="w-4 h-4 text-blue-500" />
+            <span>ダッシュボード</span>
+            <span className="ml-2 text-xs text-muted-foreground">
+              ダッシュボード画面に移動
+            </span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            href={`/dashboard/profiles/${member.userId}`}
+            className="flex items-center gap-2"
+          >
+            <UserCircle className="w-4 h-4 text-green-500" />
+            <span>プロフィール</span>
+            <span className="ml-2 text-xs text-muted-foreground">
+              プロフィール画面に移動
+            </span>
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  const renderMemberList = (
+    bucket: PresenceBucket,
+    bucketMembers: LabMember[]
+  ) => {
+    const config = statusConfigs[bucket];
+
+    if (bucketMembers.length === 0) {
+      return (
+        <p className="text-center text-muted-foreground py-2">
+          {config.emptyMessage}
+        </p>
+      );
+    }
+
+    return (
+      <div className="space-y-2">
+        {bucketMembers.map((member) => {
+          const description = config.description(member);
+          return (
+            <div
+              key={member.id}
+              className="flex items-center justify-between p-2 rounded-lg border bg-card"
+            >
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={member.imageUrl} alt={member.name} />
+                  <AvatarFallback>
+                    {member.name.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="flex items-center space-x-1">
+                    {renderMemberActions(member)}
+                    {member.academicYear && (
+                      <Badge variant="secondary" className="text-xs">
+                        {member.academicYear}
+                      </Badge>
+                    )}
+                  </div>
+                  {description ? (
+                    <p className="text-xs text-muted-foreground">
+                      {description}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+              <div className="flex items-center space-x-1">
+                <div
+                  className={`h-2 w-2 rounded-full ${config.dotClass}`}
+                ></div>
+                <span className="text-xs text-muted-foreground">
+                  {config.statusLabel}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-[calc(100vh-14rem)]">
       {Object.entries(labGroups).map(([lab, labMembers]) => {
-        const presentMembers = labMembers.filter(
-          (member) => member.isCheckedIn
-        );
-        const absentMembers = labMembers.filter(
-          (member) => !member.isCheckedIn
-        );
+        const buckets: Record<PresenceBucket, LabMember[]> = {
+          IN_LAB: [],
+          ON_CAMPUS: [],
+          OFF_CAMPUS: [],
+        };
+
+        labMembers.forEach((member) => {
+          const status =
+            member.presenceStatus ??
+            (member.isCheckedIn ? "IN_LAB" : "OFF_CAMPUS");
+          buckets[status].push(member);
+        });
 
         return (
           <Card
@@ -122,187 +270,21 @@ export function AllAttendanceList() {
               </CardTitle>
             </CardHeader>
             <CardContent className="h-[calc(100%-3rem)] overflow-y-auto">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">
-                    在室中 ({presentMembers.length})
-                  </h3>
-                  {presentMembers.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-2">
-                      現在在室しているメンバーはいません
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {presentMembers.map((member) => (
-                        <div
-                          key={member.id}
-                          className="flex items-center justify-between p-2 rounded-lg border bg-card"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage
-                                src={member.imageUrl}
-                                alt={member.name}
-                              />
-                              <AvatarFallback>
-                                {member.name.slice(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="flex items-center space-x-1">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <span className="font-medium hover:underline text-sm cursor-pointer">
-                                      {member.name}
-                                    </span>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="start">
-                                    <DropdownMenuLabel>
-                                      メンバー操作
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem asChild>
-                                      <Link
-                                        href={`/dashboard/${member.userId}`}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <LayoutDashboard className="w-4 h-4 text-blue-500" />
-                                        <span>ダッシュボード</span>
-                                        <span className="ml-2 text-xs text-muted-foreground">
-                                          ダッシュボード画面に移動
-                                        </span>
-                                      </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem asChild>
-                                      <Link
-                                        href={`/dashboard/profiles/${member.userId}`}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <UserCircle className="w-4 h-4 text-green-500" />
-                                        <span>プロフィール</span>
-                                        <span className="ml-2 text-xs text-muted-foreground">
-                                          プロフィール画面に移動
-                                        </span>
-                                      </Link>
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                                {member.academicYear && (
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    {member.academicYear}
-                                  </Badge>
-                                )}
-                              </div>
-                              {member.Attendance[0] &&
-                                member.Attendance[0].check_in && (
-                                  <p className="text-xs text-muted-foreground">
-                                    {formatDistanceToNow(
-                                      new Date(member.Attendance[0].check_in),
-                                      {
-                                        addSuffix: true,
-                                        locale: ja,
-                                      }
-                                    )}
-                                    から在室中
-                                  </p>
-                                )}
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">
-                    不在 ({absentMembers.length})
-                  </h3>
-                  {absentMembers.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-2">
-                      退室しているメンバーはいません
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {absentMembers.map((member) => (
-                        <div
-                          key={member.id}
-                          className="flex items-center justify-between p-2 rounded-lg border bg-card"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage
-                                src={member.imageUrl}
-                                alt={member.name}
-                              />
-                              <AvatarFallback>
-                                {member.name.slice(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="flex items-center space-x-1">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <span className="font-medium hover:underline text-sm cursor-pointer">
-                                      {member.name}
-                                    </span>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="start">
-                                    <DropdownMenuLabel>
-                                      メンバー操作
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem asChild>
-                                      <Link
-                                        href={`/dashboard/${member.userId}`}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <LayoutDashboard className="w-4 h-4 text-blue-500" />
-                                        <span>ダッシュボード</span>
-                                        <span className="ml-2 text-xs text-muted-foreground">
-                                          ダッシュボード画面に移動
-                                        </span>
-                                      </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem asChild>
-                                      <Link
-                                        href={`/dashboard/profiles/${member.userId}`}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <UserCircle className="w-4 h-4 text-green-500" />
-                                        <span>プロフィール</span>
-                                        <span className="ml-2 text-xs text-muted-foreground">
-                                          プロフィール画面に移動
-                                        </span>
-                                      </Link>
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                                {member.academicYear && (
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    {member.academicYear}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <div className="h-2 w-2 rounded-full bg-gray-300"></div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+              <div className="space-y-6">
+                {(Object.keys(statusConfigs) as PresenceBucket[]).map(
+                  (bucket) => {
+                    const config = statusConfigs[bucket];
+                    const bucketMembers = buckets[bucket];
+                    return (
+                      <div key={`${lab}-${bucket}`}>
+                        <h3 className="text-lg font-semibold mb-2">
+                          {config.title} ({bucketMembers.length})
+                        </h3>
+                        {renderMemberList(bucket, bucketMembers)}
+                      </div>
+                    );
+                  }
+                )}
               </div>
             </CardContent>
           </Card>

@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { sendCheckoutReminderEmail } from "@/lib/mail";
 import { cache } from "react";
 import { updateAttendance } from "@/lib/prisma/attendance";
-import { UserProfile, Attendance } from "@prisma/client";
+import { UserProfile, Attendance, PresenceStatus } from "@prisma/client";
 
 type UserWithAttendance = UserProfile & {
   Attendance: Attendance[];
@@ -48,9 +48,10 @@ async function processUser(user: UserWithAttendance) {
           },
           data: {
             isCheckedIn: false,
+            presenceStatus: PresenceStatus.OFF_CAMPUS,
           },
         }),
-        updateAttendance(user.id),
+        updateAttendance(user.id, { nextStatus: PresenceStatus.OFF_CAMPUS }),
       ]);
 
       // メール送信は非同期で実行（レスポンスを待たない）
